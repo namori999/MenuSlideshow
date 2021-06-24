@@ -1,0 +1,31 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">#fa8072</item>
+        <item name="colorPrimaryDark">#b22222</item>
+        <item name="colorAccent">#ffd700</item>
+
+     
+    </style>
+
+    <style name="Theme.AppCompat.Light.NoActionBar.FullScreen" parent="@style/Theme.AppCompat.Light.NoActionBar">
+        <item name="windowNoTitle">true</item>
+        <item name="windowActionBar">false</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:navigationBarColor" tools:targetApi="lollipop">@color/colorPrimary</item>
+
+    </style>
+
+    <style name="my_actionbar_style" parent="@android:style/Widget.Holo.Light.ActionBar">
+        <item name="android:background">#000000</item>
+    </style>
+
+
+
+    <style name ="SlideAnimation">
+    <item name="android:windowContentTransitions" tools:targetApi="lollipop">true</item>
+    </style>
+
+</resources>

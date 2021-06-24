@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="10dp">
+
+        <ImageView
+            android:id="@+id/imageViewRecord"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:background="@color/white"
+            android:src="@drawable/ic_add_a_photo_black_24dp"
+            android:tint="@color/colorAccent" />
+        <EditText
+            android:id="@+id/edtName"
+            android:hint="Name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="10"/>
+
+        <Button
+            android:id="@+id/btnUpdate"
+            style="@style/Base.Widget.AppCompat.Button.Colored"
+            android:text="Update"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
