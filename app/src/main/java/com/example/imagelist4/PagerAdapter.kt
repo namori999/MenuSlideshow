@@ -9,11 +9,14 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import androidx.viewpager2.widget.ViewPager2
+import java.lang.Integer.MAX_VALUE
 
 
 class PagerAdapter() : RecyclerView.Adapter<PagerAdapter.PagerViewHolder>() {
 
     private var myDataSet: List<Model>? = null
+    private var viewPager2: ViewPager2? = null
 
 
     fun submitList(myDataSet: List<Model>?) {
@@ -36,14 +39,19 @@ class PagerAdapter() : RecyclerView.Adapter<PagerAdapter.PagerViewHolder>() {
 
         holder.bind(current?.name, current?.image)
 
+        if (position == myDataSet?.size!! - 2) {
+            viewPager2?.post(runnable);
+        } /*else if (position == 2) {
+            viewPager2.post(runnable2);
+        }*/
     }
 
     class PagerViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val txtView: TextView = itemView.findViewById(R.id.pagerText)
         val imageView: ImageView = itemView.findViewById(R.id.pagerImg)
 
-
         fun bind(text: String?, image: ByteArray?) {
+
             txtView.text = text
             val recordImage = image
             val bitmap = recordImage?.size?.let {
@@ -68,12 +76,23 @@ class PagerAdapter() : RecyclerView.Adapter<PagerAdapter.PagerViewHolder>() {
 
     }
 
-    override fun getItemCount(): Int {
-        return if (myDataSet == null) 0 else myDataSet?.size!!
+    private val runnable = Runnable {
+        viewPager2!!.setCurrentItem(0, true)
+        myDataSet = myDataSet
+        notifyDataSetChanged()
     }
 
-    // override fun getItemCount(): Int {
-      //  return myDataset.size
-    //}
-}
 
+    override fun getItemCount(): Int {
+
+        return if (myDataSet == null) 0 else myDataSet?.size!!
+
+
+    }
+
+    fun getAllData(): List<Model>? {
+        return myDataSet
+
+    }
+
+}

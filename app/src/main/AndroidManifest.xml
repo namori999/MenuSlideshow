@@ -3,6 +3,9 @@
     package="com.example.imagelist4">
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACTION_OPEN_DOCUMENT" />
+
 
     <application
         android:name=".ModelApplication"

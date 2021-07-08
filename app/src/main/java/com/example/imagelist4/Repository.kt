@@ -39,6 +39,11 @@ class Repository(private val modelDao: ModelDao) {
         modelDao.update(model)
     }
 
+    suspend fun deleteAll() {
+        modelDao.deleteAll()
+    }
+
+
 
     private class deleteWordAsyncTask internal constructor(dao: ModelDao) :
         AsyncTask<Model?, Void?, Void?>() {

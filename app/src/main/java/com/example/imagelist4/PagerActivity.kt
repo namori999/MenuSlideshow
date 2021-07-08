@@ -3,20 +3,23 @@ package com.example.imagelist4
 import android.app.KeyguardManager
 import android.content.Context
 import android.content.Intent
-import android.database.sqlite.SQLiteOpenHelper
 import android.graphics.Rect
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.*
-import android.widget.ProgressBar
 import androidx.activity.viewModels
 import androidx.annotation.DimenRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.RecyclerView
+import androidx.viewpager.widget.ViewPager
 import androidx.viewpager2.widget.ViewPager2
-import kotlin.math.abs
+import java.lang.Math.abs
+import java.util.*
+import kotlin.collections.ArrayList
 
 
 // TODO: Rename parameter arguments, choose names that match
@@ -34,17 +37,18 @@ private const val ARG_PARAM2 = "param2"
 class PagerFragment : AppCompatActivity() {
 
 
-    private var mSQLiteHelper: SQLiteOpenHelper? = null
-    private val dbName: String = "SampleDB"
-    private val dbVersion: Int = 1
-
     private val CODE_AUTHENTICATION_VERIFICATION = 241
 
     private val modelViewModel: ModelViewModel by viewModels {
         ModelViewModel.ModelViewModelFactory((application as ModelApplication).repository)
     }
 
-    lateinit var modelDao: ModelDao
+
+    private var scrollHandler = Handler(Looper.getMainLooper())
+
+    companion object {
+        const val SCROLL_DELAY = 10000L
+    }
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -55,6 +59,8 @@ class PagerFragment : AppCompatActivity() {
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
 
+        val myDataSet = ArrayList<Model>()
+
         val adapter = PagerAdapter()
 
         val observer =  Observer<List<Model>> { model ->
@@ -64,6 +70,7 @@ class PagerFragment : AppCompatActivity() {
         modelViewModel.allWords.observe(this,observer)
 
 
+
         // RecyclerView の設定
         val viewPager2 = findViewById<ViewPager2>(R.id.viewpager2)
 
@@ -71,12 +78,15 @@ class PagerFragment : AppCompatActivity() {
 
 
 
+        val scrollRunnable = Runnable {
+            viewPager2.currentItem = viewPager2.currentItem + 1
+        }
 
 
         viewPager2?.orientation = ViewPager2.ORIENTATION_HORIZONTAL
 
 // You need to retain one page on each side so that the next and previous items are visible
-        viewPager2?.offscreenPageLimit = 1
+       // viewPager2?.offscreenPageLimit = 1
 
 
 // Add a PageTransformer that translates the next and previous items horizontally
@@ -102,10 +112,46 @@ class PagerFragment : AppCompatActivity() {
         viewPager2?.addItemDecoration(itemDecoration)
 
 
+        viewPager2.apply {
+            clipToPadding = false
+            clipChildren = false
+            offscreenPageLimit = 3
+            getChildAt(0).overScrollMode = RecyclerView.OVER_SCROLL_NEVER
+        }
+
+        viewPager2.apply {
+            registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+
+                var currentPage: Int = 0
+                var mPreviousPosition: Int = 0
+                var mIsEndOfCycle = false
+
+                override fun onPageSelected(position: Int) {
+                    super.onPageSelected(position)
+                    scrollHandler.removeCallbacks(scrollRunnable)
+                    scrollHandler.postDelayed(scrollRunnable, SCROLL_DELAY)
+                }
+
+                override fun onPageScrollStateChanged(state: Int) {
+                    if (state == ViewPager.SCROLL_STATE_IDLE) {
+                        val curr: Int = viewPager2.getCurrentItem()
+                        val lastReal: Int = adapter.itemCount - 2
+                        if (curr == 0) {
+                            viewPager2.setCurrentItem(lastReal, false)
+                        } else if (curr > lastReal) {
+
+                            viewPager2.setCurrentItem(0, false)
+                        }
+                    }
+                }
+
+            })
+        }
 
 
 
-    }
+
+        }
 
 
 
@@ -133,7 +179,31 @@ class PagerFragment : AppCompatActivity() {
     }
 
 
+    override fun onResume() {
+        super.onResume()
+        hideSystemUI()
+        val viewPager2 = findViewById<ViewPager2>(R.id.viewpager2)
 
+        val scrollRunnable = Runnable {
+            viewPager2.currentItem = viewPager2.currentItem + 1
+        }
+
+        scrollHandler.postDelayed(scrollRunnable, SCROLL_DELAY)
+
+
+    }
+
+    override fun onPause() {
+        super.onPause()
+        val viewPager2 = findViewById<ViewPager2>(R.id.viewpager2)
+
+        val scrollRunnable = Runnable {
+            viewPager2.currentItem = viewPager2.currentItem + 1
+        }
+
+        scrollHandler.removeCallbacks(scrollRunnable)
+
+    }
 
 
 
@@ -148,17 +218,6 @@ class PagerFragment : AppCompatActivity() {
     }
 
 
-
-    override fun onResume() {
-        super.onResume()
-        hideSystemUI()
-
-        val adapter = ModelListAdapter()
-
-
-
-        Log.d("debug", "onResume()")
-    }
 
 
 
@@ -182,6 +241,7 @@ class PagerFragment : AppCompatActivity() {
 
 
 }
+
 
 class HorizontalMarginItemDecoration(context: Context, @DimenRes horizontalMarginInDp: Int) :
     RecyclerView.ItemDecoration() {

@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:id="@+id/move"
-        android:title="並べかえ" >
+        android:title="並べかえ" />
 
-    </item>
+    <item android:id="@+id/deleteAll"
+        android:title="ぜんぶ削除" />
 
 </menu>

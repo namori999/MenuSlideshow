@@ -33,6 +33,7 @@ interface ModelDao {
 
 
 
+
     @Query("DELETE FROM model WHERE id = :modelId")
     suspend fun deleteById(modelId: Long)
 
@@ -52,6 +53,7 @@ interface ModelDao {
     @Query("SELECT * FROM model where id= :id")
     suspend fun getUserById(id: Int) : Model
 
-
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertAll(vararg model: Model)
 
 }

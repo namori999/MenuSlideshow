@@ -33,6 +33,10 @@ open class ModelViewModel(private val repository: Repository) : ViewModel() {
         repository.update(model)
     }
 
+    fun deleteAll() = viewModelScope.launch {
+        repository.deleteAll()
+    }
+
 
 
 

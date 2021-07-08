@@ -44,6 +44,8 @@
         app:layout_constraintTop_toTopOf="parent">
 
 
+
+
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/pickImage"
             android:layout_width="200dp"
@@ -53,8 +55,53 @@
             android:layout_gravity="center"
             android:layout_marginTop="18dp"
             android:ems="10"
-            android:src="@drawable/ic_add_a_photo_black_24dp"
-             />
+            android:src="@drawable/ic_add_a_photo_black_24dp" />
+
+            <TextView
+                android:id="@+id/countText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/colorGray"
+                android:textSize="24dp"
+                android:layout_gravity="center"
+                android:visibility="invisible">
+
+            </TextView>
+
+        <LinearLayout
+            android:id="@+id/imageSwichLayaut"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:visibility="gone"
+            >
+
+            <ImageButton
+                android:id="@+id/leftButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:src="@drawable/ic_baseline_arrow_left_24"
+                android:tint="@color/colorPrimary" />
+
+
+            <ImageView
+                android:id="@+id/imagePreview"
+                android:layout_width="200dp"
+                android:layout_height="100dp" />
+
+            <ImageButton
+                android:id="@+id/rightButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:src="@drawable/ic_baseline_arrow_right_24"
+                android:tint="@color/colorPrimary" />
+
+
+
+        </LinearLayout>
+
 
         <EditText
             android:id="@+id/subject_edittext"

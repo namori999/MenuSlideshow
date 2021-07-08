@@ -7,12 +7,16 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.app.Dialog
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
+import android.os.ParcelFileDescriptor
+import android.provider.DocumentsContract
 import android.util.Log
 import android.view.*
 import android.view.View.INVISIBLE
@@ -22,6 +26,7 @@ import androidx.activity.viewModels
 import androidx.annotation.Nullable
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -30,15 +35,17 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.room.TypeConverter
 import com.example.imagelist4.AddMenuActivity.Companion.EXTRA_IMG
+import com.example.imagelist4.AddMenuActivity.Companion.EXTRA_MULTI_NAME
+import com.example.imagelist4.AddMenuActivity.Companion.EXTRA_MULTI_URI
 import com.example.imagelist4.AddMenuActivity.Companion.EXTRA_NAME
 import com.example.imagelist4.R.*
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
-import java.io.ByteArrayOutputStream
-import java.io.FileNotFoundException
+import java.io.*
 import java.util.*
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
+import kotlin.collections.ArrayList
 
 
 class MenuListActivity() : AppCompatActivity() {
@@ -57,6 +64,9 @@ class MenuListActivity() : AppCompatActivity() {
 
     companion object {
         const val RESULT_ACTIVITY = 1000
+        const val PICK_FILE = 2
+        const val NAME_TO_INSERT = "com.example.imagelist4.NAME_TO_INSERT"
+
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -200,6 +210,28 @@ class MenuListActivity() : AppCompatActivity() {
             R.id.move -> {
 
                 //handleButton.visibility = View.VISIBLE
+            }
+            R.id.deleteAll ->{
+
+                val array = arrayOf("ぜんぶ削除する", "キャンセル")
+                val builder = AlertDialog.Builder(this@MenuListActivity)
+
+                // Set a title for alert dialog
+                builder.setTitle("取り消せません。ほんとうに消しますか？")
+                builder.setItems(array, { dialogInterface, i ->
+                    if (i == 0) {
+                        modelViewModel.deleteAll()
+                        Toast.makeText(this,"all data deleted !",Toast.LENGTH_LONG)
+
+                    } else if (i == 1) {
+                        finish()
+
+                    }
+                })
+
+                val dialog = builder.create()
+                dialog.show()
+
             }
         }
         return super.onOptionsItemSelected(item)
@@ -402,42 +434,188 @@ class MenuListActivity() : AppCompatActivity() {
         progress.visibility = INVISIBLE
 
 
+        setupPermissions()
+
+
         Log.d("debug", "onResume()")
 
     }
 
+    private fun setupPermissions() {
+        val permission = ContextCompat.checkSelfPermission(this,
+            Manifest.permission.READ_EXTERNAL_STORAGE)
+
+
+        if (permission != PackageManager.PERMISSION_GRANTED) {
+            Log.i("TAG", "Permission to record denied")
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    Manifest.permission.RECORD_AUDIO)) {
+                val builder = AlertDialog.Builder(this)
+                builder.setMessage("Permission to access the microphone is required for this app to open document.")
+                        .setTitle("Permission required")
+
+                            builder.setPositiveButton("OK"
+                            ) { dialog, id ->
+                        Log.i("TAG", "Clicked")
+                        makeRequest()
+                    }
+
+                    val dialog = builder.create()
+                dialog.show()
+            } else {
+                makeRequest()
+            }
+        }
+    }
+
+    private fun makeRequest() {
+        ActivityCompat.requestPermissions(this,
+            arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
+            PICK_FILE)
+    }
+
+   override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+        when (requestCode) {
+            PICK_FILE -> {
+
+                if (grantResults.isEmpty() || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+
+                    Log.i("debug", "Permission has been denied by user")
+                } else {
+                    Log.i("debug", "Permission has been granted by user")
+                }
+            }
+        }
+    }
 
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, intentData: Intent?) {
         super.onActivityResult(requestCode, resultCode, intentData)
+        if (requestCode == 888) {
+            if (resultCode == RESULT_OK) {
+                val sourceTreeUri = intentData?.data
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                    if (sourceTreeUri != null) {
+                        this.getContentResolver().takePersistableUriPermission(
+                            sourceTreeUri,
+                            Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                        )
+                    }
+                }
+                return
+            }
+
+        }
 
         if (requestCode == 123 && resultCode == RESULT_OK) {
             val name = intentData?.getStringExtra(EXTRA_NAME)
             val uri = intentData?.getExtras()?.get(EXTRA_IMG) as Uri?
 
-            val imageArray = convertImageToByte(uri)
 
-            val data = Model(0, name, imageArray)
+            if (name == null){
+                //multiple data
 
-            val lengthbmp = imageArray?.size?.toLong()
+                val b = intentData?.extras
+                val PlatosIntent = intentData?.extras
+                val desc_plato = PlatosIntent?.getStringArrayList(EXTRA_MULTI_NAME)
+                //val imagen_plato = PlatosIntent?.getParcelable(EXTRA_MULTI_URI) as ArrayList<Uri>
+
+                val imagen_plato: ArrayList<Uri>? = PlatosIntent?.getParcelableArrayList(EXTRA_MULTI_URI)
 
 
-            if (lengthbmp != null) {
-                if (lengthbmp > 100000) {
+                //val imagen_plato = PlatosIntent?.getStringArrayList(EXTRA_MULTI_URI)
+                               /** */
+                if (PlatosIntent != null) {
+                    for (key in PlatosIntent.keySet()) {
+                        val value = PlatosIntent[key]
+                        println(
+                            "BUNDLE KEYS:" + String.format(
+                                "%s %s\n", key,
+                                value.toString()
+                            )
+                        )
+                    }
 
+
+                    if (desc_plato != null) {
+                        if (imagen_plato != null) {
+                         //   checkPermission(desc_plato,imagen_plato)
+                        }
+                    }
+
+                    var count = imagen_plato?.size
+                    for (i in 0..count!! -1) {
+                        // adding imageuri in array
+                        ActivityCompat.requestPermissions(
+                            this@MenuListActivity, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
+                            888
+                        )
+
+                        val name: String? = desc_plato?.get(i)
+
+                        val uri = imagen_plato?.get(i)
+
+
+                        val imageArray = convertImageToByte(uri)
+
+
+
+                       val data = Model(0, name, imageArray)
+
+
+                       modelViewModel.insert(data)
+
+                    }
                     Toast.makeText(
                         applicationContext,
-                        "too big Image",
+                        "$count items inserted !",
                         Toast.LENGTH_LONG
                     ).show()
 
+                }
 
-                } else {
 
 
-                    modelViewModel.insert(data)
+
+            } else {
+                //single data
+
+
+                val imageArray = convertImageToByte(uri)
+
+                val data = Model(0, name, imageArray)
+
+                val lengthbmp = imageArray?.size?.toLong()
+
+
+                if (lengthbmp != null) {
+                    if (lengthbmp > 100000) {
+
+                        Toast.makeText(
+                            applicationContext,
+                            "too big Image",
+                            Toast.LENGTH_LONG
+                        ).show()
+
+
+                    } else {
+
+
+                        modelViewModel.insert(data)
+                        Toast.makeText(
+                            applicationContext,
+                            "item inserted!",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+
                 }
             }
+
+
+
+
+
 
         } else {
             Toast.makeText(
@@ -449,23 +627,67 @@ class MenuListActivity() : AppCompatActivity() {
         Log.d("debug", "onActivityResult()")
     }
 
+
+
+    fun checkPermission( nameArray :ArrayList<String>,imageUri :ArrayList<Uri>) {
+
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+            addCategory(Intent.CATEGORY_OPENABLE)
+            type =  "image/*"
+
+            // Optionally, specify a URI for the file that should appear in the
+            // system file picker when it loads.
+            putExtra(DocumentsContract.EXTRA_INITIAL_URI, imageUri)
+            putExtra(NAME_TO_INSERT,nameArray)
+        }
+        startActivityForResult(intent, 888)
+
+
+
+
+    }
+
+
+
+
+
+    @Throws(IOException::class)
+    private fun getBitmapFromUri(uri: Uri): Bitmap {
+        val contentResolver = applicationContext.contentResolver
+        val parcelFileDescriptor: ParcelFileDescriptor =
+            contentResolver.openFileDescriptor(uri, "r")!!
+        val fileDescriptor: FileDescriptor = parcelFileDescriptor.fileDescriptor
+        val image: Bitmap = BitmapFactory.decodeFileDescriptor(fileDescriptor)
+        parcelFileDescriptor.close()
+        return image
+    }
+
     @TypeConverter
     fun convertImageToByte(uri: Uri?): ByteArray? {
+        //if (uri != null) {
+        //    isVirtualFile(uri)
+        //}
+
         var data: ByteArray? = null
         try {
             val cr = baseContext.contentResolver
-            val inputStream = cr.openInputStream(uri!!)
-            val bitmap = BitmapFactory.decodeStream(inputStream)
+            //val inputStream = uri?.let { cr.openInputStream(it) }
+            val bitmap = uri?.let { getBitmapFromUri(it) }
             val baos = ByteArrayOutputStream()
 
-            val sBitmap = getResizedBitmap(bitmap, 700)
+
+            val sBitmap = bitmap?.let { getResizedBitmap(it, 700) }
             sBitmap?.compress(Bitmap.CompressFormat.JPEG, 80, baos)
             data = baos.toByteArray()
         } catch (e: FileNotFoundException) {
             e.printStackTrace()
         }
+
         return data
     }
+
+
+
 
     fun getResizedBitmap(image: Bitmap, maxSize: Int): Bitmap? {
         var width = image.width
@@ -480,6 +702,7 @@ class MenuListActivity() : AppCompatActivity() {
         }
         return Bitmap.createScaledBitmap(image, width, height, true)
     }
+
 
 
 
