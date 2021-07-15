@@ -3,6 +3,8 @@ package com.example.imagelist4
 import android.os.AsyncTask
 import android.view.Display
 import androidx.annotation.WorkerThread
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import kotlinx.coroutines.flow.*
 
 
@@ -13,7 +15,7 @@ class Repository(private val modelDao: ModelDao) {
     // Room executes all queries on a separate thread.
     // Observed Flow will notify the observer when the data has changed.
 
-    val allWords: Flow<List<Model>> = modelDao.getAlphabetizedWords()
+    val allWords: Flow<List<Model>> = modelDao.getAll()
 
 
 

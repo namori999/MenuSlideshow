@@ -15,7 +15,6 @@ open class ModelViewModel(private val repository: Repository) : ViewModel() {
     val allWords: LiveData<List<Model>> = repository.allWords.asLiveData()
 
 
-
     /**
      * Launching a new coroutine to insert the data in a non-blocking way
      */

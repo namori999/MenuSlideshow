@@ -9,9 +9,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.lifecycle.LiveData
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import androidx.room.Ignore
 
 
 class ModelListAdapter : RecyclerView.Adapter<ModelListAdapter.ModelViewHolder>() {
@@ -25,7 +25,11 @@ class ModelListAdapter : RecyclerView.Adapter<ModelListAdapter.ModelViewHolder>(
     // リスナー格納変数
     private lateinit var listener: onItemClickListener
 
+
+
+
     fun submitList(myDataSet: List<Model>?): List<Model>? {
+
 
         this.myDataSet = myDataSet
 
@@ -35,6 +39,7 @@ class ModelListAdapter : RecyclerView.Adapter<ModelListAdapter.ModelViewHolder>(
         return myDataSet
 
     }
+
 
 
     fun notify(myDataSet: List<Model>?){

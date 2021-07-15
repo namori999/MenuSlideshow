@@ -209,6 +209,30 @@ class MenuListActivity() : AppCompatActivity() {
         when (item.itemId) {
             R.id.move -> {
 
+                val array = arrayOf("名前順に" , "キャンセル")
+                val builder = AlertDialog.Builder(this@MenuListActivity)
+
+                // Set a title for alert dialog
+                builder.setTitle("")
+                builder.setItems(array, { dialogInterface, i ->
+                    if (i == 0) {
+
+
+
+
+                        Toast.makeText(this,"sorted !",Toast.LENGTH_LONG)
+
+                    } else if (i == 1) {
+                        finish()
+
+                    }
+                })
+
+                val dialog = builder.create()
+                dialog.show()
+
+
+
                 //handleButton.visibility = View.VISIBLE
             }
             R.id.deleteAll ->{
@@ -249,9 +273,10 @@ class MenuListActivity() : AppCompatActivity() {
             target: RecyclerView.ViewHolder
         ): Boolean {
 
-            val fromPos = viewHolder?.adapterPosition ?: 0
-            val toPos = target?.adapterPosition ?: 0
+            val fromPos = viewHolder?.absoluteAdapterPosition
+            val toPos = target?.absoluteAdapterPosition
             val adapter = ModelListAdapter()
+
 
             //Collections.swap(, fromPos, toPos)
 
@@ -298,7 +323,7 @@ class MenuListActivity() : AppCompatActivity() {
             val progress: ProgressBar = findViewById(R.id.progress)
             progress.visibility = VISIBLE
 
-            val position: Int = viewHolder.adapterPosition
+            val position: Int = viewHolder.getBindingAdapterPosition()
             val dataset = getValue(modelViewModel.allWords)
             val myWord =dataset?.get(position)
 
@@ -351,38 +376,55 @@ class MenuListActivity() : AppCompatActivity() {
     ) {
         val mWordEntities = getValue(modelViewModel.allWords)
 
+        //val fId: Int = mWordEntities?.get(fromPos)!!.id
+        //val fName = mWordEntities?.get(fromPos)?.name
+        //val fImg = mWordEntities?.get(fromPos)?.image
+
+       // val tName = mWordEntities?.get(i + 1).name
+        //val tImg = mWordEntities?.get(i + 1).image
+
+        //println("FROM data:" + fName + fImg + fId)
+
+
 
         if (fromPos < toPos) {
             for (i in fromPos until toPos) {
-                Collections.swap(mWordEntities, i, i + 1)
+                //Collections.swap(mWordEntities, i, i + 1)
                 val order1: Int = mWordEntities?.get(i)!!.id
                 val order2: Int = mWordEntities?.get(i + 1)!!.id
 
                 val fName = mWordEntities?.get(i).name
+                val fUnName = mWordEntities?.get(i).unName
                 val fImg = mWordEntities?.get(i).image
 
                 val tName = mWordEntities?.get(i + 1).name
+                val tUnName = mWordEntities?.get(i + 1).unName
                 val tImg = mWordEntities?.get(i + 1).image
 
-                modelViewModel.update(Model(order2,fName,fImg))
-                modelViewModel.update(Model(order1,tName,tImg))
+                modelViewModel.update(Model(order1,tUnName,fName,fImg))
+                modelViewModel.update(Model(order2,fUnName,tName,tImg))
 
             }
         } else {
             for (i in fromPos downTo toPos + 1) {
-                Collections.swap(mWordEntities, i, i - 1)
+                //Collections.swap(mWordEntities, i, i - 1)
                 val order1: Int = mWordEntities?.get(i)!!.id
                 val order2: Int = mWordEntities?.get(i - 1).id
+
                 val fName = mWordEntities?.get(i)!!.name
+                val fUnName = mWordEntities?.get(i).unName
                 val fImg = mWordEntities?.get(i).image
 
                 val tName = mWordEntities?.get(i - 1).name
+                val tUnName = mWordEntities?.get(i - 1).unName
                 val tImg = mWordEntities?.get(i - 1).image
 
-                modelViewModel.update(Model(order2,fName,fImg))
-                modelViewModel.update(Model(order1,tName,tImg))
+                modelViewModel.update(Model(order1,tUnName,fName,fImg))
+                modelViewModel.update(Model(order2,fUnName,tName,tImg))
             }
         }
+
+
     }
 
 
@@ -560,7 +602,7 @@ class MenuListActivity() : AppCompatActivity() {
 
 
 
-                       val data = Model(0, name, imageArray)
+                       val data = Model(0, name, name, imageArray)
 
 
                        modelViewModel.insert(data)
@@ -583,7 +625,7 @@ class MenuListActivity() : AppCompatActivity() {
 
                 val imageArray = convertImageToByte(uri)
 
-                val data = Model(0, name, imageArray)
+                val data = Model(0, name, name, imageArray)
 
                 val lengthbmp = imageArray?.size?.toLong()
 

@@ -16,7 +16,7 @@ import kotlinx.coroutines.launch
 import java.io.ByteArrayOutputStream
 
 
-@Database(entities = arrayOf(Model::class), version = 5 ,  exportSchema = false)
+@Database(entities = arrayOf(Model::class), version = 6 ,  exportSchema = false)
 abstract class ModelRoomDatabase : RoomDatabase() {
 
     abstract fun modelDao(): ModelDao
@@ -92,9 +92,9 @@ abstract class ModelRoomDatabase : RoomDatabase() {
                 val sample = stream.toByteArray()
 
 
-                var item = Model(0,"hello", sample)
+                var item = Model(0,"name1","hello", sample)
                 modelDao.insert(item)
-                item = Model(0,"World!", sample)
+                item = Model(0,"name2","World!", sample)
                 modelDao.insert(item)
             }
 

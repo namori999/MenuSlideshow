@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.Flow
 data class Model (
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo var id: Int = 0,
+    @ColumnInfo(name = "underName") var unName:String?,
     @ColumnInfo(name = "name") var name: String? ,
     @ColumnInfo(name = "image", typeAffinity = ColumnInfo.BLOB)
     var image: ByteArray?)
@@ -38,16 +39,12 @@ interface ModelDao {
     suspend fun deleteById(modelId: Long)
 
 
-    @Query("SELECT * FROM model")
-      suspend fun getAll(): Array<Model>
-
-
     @Query("DELETE FROM model")
     suspend fun deleteAll()
 
 
-    @Query("SELECT * FROM model")
-    fun getAlphabetizedWords(): Flow<List<Model>>
+    @Query("SELECT * FROM model ORDER BY underName ASC")
+    fun getAll(): Flow<List<Model>>
 
 
     @Query("SELECT * FROM model where id= :id")
@@ -55,5 +52,8 @@ interface ModelDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertAll(vararg model: Model)
+
+    @Query("SELECT * FROM model ORDER BY name ASC")
+    fun getSortByAscName(): Flow<List<Model>>
 
 }

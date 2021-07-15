@@ -247,8 +247,11 @@ final class AddMenuActivity : AppCompatActivity() {
 
             if (data?.getClipData() != null) {
                 var count = data.clipData?.itemCount
+
+
+
                 val mArrayUri = arrayListOf<Uri>()
-                val mArrayImage = arrayListOf<String>()
+               // val mArrayImage = arrayListOf<String>()
                 val mArrayName = arrayListOf<String>()
 
                 val subjectEditText = findViewById<View>(R.id.subject_edittext) as EditText
@@ -285,6 +288,26 @@ final class AddMenuActivity : AppCompatActivity() {
                         subjectEditText.setText(fileName)
 
                     }
+
+                    //sort by name
+
+                    val beforeName = mArrayName
+                    println("BEFOR NAME:" + beforeName)
+                    val sortedName =  beforeName.sortedWith(String.CASE_INSENSITIVE_ORDER)
+                    println("AFTER NAME:" +sortedName)
+
+
+
+                    val beforeUri = mArrayUri
+                    println("BEFOR URI:" + beforeUri)
+
+                    val there = beforeUri.sortedBy { sortedName.indexOf(it) }// sorted nameを基準に並びかえてね
+                    println("AFTER URI:" +there)
+
+                    //sort using key map
+
+
+                    //intentdata
 
                     intent.putExtra(EXTRA_MULTI_URI,mArrayUri)
                     intent.putExtra(EXTRA_MULTI_NAME,mArrayName)
@@ -357,6 +380,14 @@ final class AddMenuActivity : AppCompatActivity() {
 
             super.onActivityResult(requestCode, resultCode, data)
         }
+
+    }
+
+
+    public class CustomObj(var customObjPropery : String){
+
+        override fun toString(): String {
+            return "$customObjPropery"    }
 
     }
 
