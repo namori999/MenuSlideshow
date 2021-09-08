@@ -19,3 +19,4 @@ Widgets and Liblarys
 - RoomDatabase
 - RecyclerView
 - ViewPager2
+- ImageCropper
