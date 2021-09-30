@@ -5,7 +5,7 @@ Function
 
 - Pick Multiple Images from Local Gallery
 - Crop Images
-- Save Images Data
+- Save Images
 - Sortable List
 - Swipe to Paging
 - Outo Slide Show
