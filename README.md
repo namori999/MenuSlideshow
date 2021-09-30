@@ -1,4 +1,4 @@
-menu slide app for a cafe
+#MenuSlideshow
 
 
 Function
